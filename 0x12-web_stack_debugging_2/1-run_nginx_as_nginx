@@ -1,4 +1,3 @@
-
 #!/usr/bin/env bash
 # Fixes server bug
 chmod 644 /etc/nginx/nginx.conf
