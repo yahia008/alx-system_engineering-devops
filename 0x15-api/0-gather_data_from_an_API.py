@@ -1,43 +1,30 @@
 #!/usr/bin/python3
-"""Providing an Employee ID will yield details
-regarding their progress on the TODO list.
-"""
+'''
+gather employee data from API
+'''
+
+import re
 import requests
-from sys import argv
+import sys
+
+REST_API = "https://jsonplaceholder.typicode.com"
 
 if __name__ == '__main__':
-    try:
-        emp_id = int(argv[1])
-    except ValueError:
-        exit()
-
-    api_url = 'https://jsonplaceholder.typicode.com'
-    user_uri = '{api}/users/{id}'.format(api=api_url, id=emp_id)
-    todo_uri = '{user_uri}/todos'.format(user_uri=user_uri)
-
-    # User Response
-    res = requests.get(user_uri).json()
-
-    # Name of the employee
-    name = res.get('name')
-
-    # User todo  Response
-    res = requests.get(todo_uri).json()
-
-    # Total number of tasks, the sum of completed and non-completed tasks
-    total = len(res)
-
-    # Number of non-completed tasks
-    non_completed = sum([elem['completed'] is False for elem in res])
-
-    # Number of completed tasks
-    completed = total - non_completed
-
-    # Formatting the expected output
-    str = "Employee {emp_name} is done with tasks({completed}/{total}):"
-    print(str.format(emp_name=name, completed=completed, total=total))
-
-    # Printing completed tasks
-    for elem in res:
-        if elem.get('completed') is True:
-            print('\t', elem.get('title'))
+    if len(sys.argv) > 1:
+        if re.fullmatch(r'\d+', sys.argv[1]):
+            id = int(sys.argv[1])
+            req = requests.get('{}/users/{}'.format(REST_API, id)).json()
+            task_req = requests.get('{}/todos'.format(REST_API)).json()
+            emp_name = req.get('name')
+            tasks = list(filter(lambda x: x.get('userId') == id, task_req))
+            completed_tasks = list(filter(lambda x: x.get('completed'), tasks))
+            print(
+                'Employee {} is done with tasks({}/{}):'.format(
+                    emp_name,
+                    len(completed_tasks),
+                    len(tasks)
+                )
+            )
+            if len(completed_tasks) > 0:
+                for task in completed_tasks:
+                    print('\t {}'.format(task.get('title')))
