@@ -1,4 +1,3 @@
-
 #!/usr/bin/python3
 """Retrieve data from an API and export it in JSON format.
 """
